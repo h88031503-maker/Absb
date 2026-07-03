@@ -14,54 +14,18 @@ on:
 jobs:
   build-android:
     name: Build for Android
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt-get install -y \
-            build-essential \
-            git \
-            python3-pip \
-            python3-setuptools \
-            python3-venv \
-            ffmpeg \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
-            libsdl2-ttf-dev \
-            libportmidi-dev \
-            libswscale-dev \
-            libavformat-dev \
-            libavcodec-dev \
-            zlib1g-dev \
-            libgstreamer1.0 \
-            gstreamer1.0-plugins-base \
-            gstreamer1.0-plugins-good \
-            libtool \
-            autoconf \
-            zip \
-            unzip \
-            openjdk-17-jdk
-
-      - name: Install Buildozer and Cython
-        run: |
-          pip install --upgrade pip
-          pip install buildozer "cython<3.0.0" virtualenv
-
       - name: Build with Buildozer
+        uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
-        run: |
-          yes | buildozer android debug
+        with:
+          command: buildozer android debug
+          buildozer_version: master
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
