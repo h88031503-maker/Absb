@@ -5,17 +5,16 @@ on:
     branches:
       - main
       - master
-  pull_request:
-    branches:
-      - main
-      - master
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build-android:
-    name: Build for Android
+    name: Build APK for Android
     runs-on: ubuntu-20.04
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,8 +26,29 @@ jobs:
           command: buildozer android debug
           buildozer_version: master
 
-      - name: Upload APK
+      - name: Upload APK as Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: package
-          path: bin/*.apk
+          name: Absb-APK
+          path: ${{ steps.buildozer.outputs.filename }}
+          retention-days: 30
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "Absb APK - Build ${{ github.run_number }}"
+          body: |
+            ## 📦 Absb Android APK
+
+            Автоматическая сборка из GitHub Actions.
+
+            ### Установка
+            1. Скачайте APK файл ниже
+            2. На телефоне разрешите установку из неизвестных источников
+            3. Установите APK
+
+            **Коммит:** ${{ github.sha }}
+          files: ${{ steps.buildozer.outputs.filename }}
+          draft: false
+          prerelease: false
